@@ -1,7 +1,5 @@
 import dayjs from "dayjs";
 import sample from "../../sample/시청 기록.json";
-import * as _ from "lodash-es";
-
 import "dayjs/locale/ko";
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
@@ -79,34 +77,10 @@ const Result = () => {
     setCurrentYear(currentYear);
   };
 
-  const bestVideo = () => {
-    if (!state || !currentYear) {
-      return;
-    }
-    let title: any = {};
-
-    currentYear.forEach((item) => {
-      item.forEach((data) => {
-        title[data.title] = title[data.title] ? (title[data.title] += 1) : 1;
-      });
-    });
-
-    const changeArray: [string, number][] = Object.entries(title);
-    const result = changeArray
-      .sort((a, b) => b[1] - a[1])
-      .reduce((acc, cur) => {
-        if (!cur[0].includes("삭제된 동영상을 시청함")) {
-          return [...acc, cur];
-        }
-        return acc;
-      }, [] as [string, number][]);
-
-    return result[0][0];
-  };
-
   if (!state || !rankData || !currentYear) {
     return <div>로딩</div>;
   }
+  console.log(state);
 
   return (
     <div>
@@ -139,15 +113,18 @@ const Result = () => {
         </ul>
       </div>
       <div>
-        <div>-- 올해 처음본 동영상</div>
+        <div>--2022년 처음본 동영상</div>
         <div>{state["2022"][1][state["2022"][1].length - 1].title}</div>
         <a href={state["2022"][1][state["2022"][1].length - 1].titleUrl}>
           {state["2022"][1][state["2022"][1].length - 1].titleUrl}
         </a>
       </div>
       <div>
-        <div>-- 가장 많이본 동영상</div>
-        <div>{bestVideo()}</div>
+        <div>--2022년 마지막에본 동영상</div>
+        <div>{state["2022"][12][0].title}</div>
+        <a href={state["2022"][12][0].titleUrl}>
+          {state["2022"][12][0].titleUrl}
+        </a>
       </div>
     </div>
   );
