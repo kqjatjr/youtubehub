@@ -10,6 +10,7 @@
     "@types/node": "^16.18.11",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
+    "daisyui": "^2.47.0",
     "dayjs": "^1.11.7",
     "lodash-es": "^4.17.21",
     "react": "^18.2.0",
@@ -44,6 +45,7 @@
     ]
   },
   "devDependencies": {
-    "@types/lodash-es": "^4.17.6"
+    "@types/lodash-es": "^4.17.6",
+    "tailwindcss": "^3.2.4"
   }
 }
