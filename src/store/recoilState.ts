@@ -17,5 +17,5 @@ type IStatistics = {
 
 export const dataState = atom({
   key: "dataState",
-  default: {} as IStatistics,
+  default: undefined as IStatistics | undefined,
 });
