@@ -1,7 +1,5 @@
 import dayjs from "dayjs";
 import sample from "../../sample/시청 기록.json";
-import * as _ from "lodash-es";
-
 import "dayjs/locale/ko";
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
@@ -24,7 +22,7 @@ type IStatistics = {
 };
 
 const Result = () => {
-  const [data, setData] = useState<any>();
+  const [currentYear, setCurrentYear] = useState<TRecord[][]>();
   const [rankData, setRankData] = useState<[string, number][]>();
   const [state, setState] = useRecoilState(dataState);
 
@@ -63,7 +61,6 @@ const Result = () => {
     const currentYear = Object.keys(state["2022"]).map((item) => {
       return state["2022"][Number(item)];
     });
-    console.log(currentYear);
 
     currentYear.forEach((item) => {
       item.forEach((data) => {
@@ -74,14 +71,16 @@ const Result = () => {
         }
       });
     });
+
     const changeArray: [string, number][] = Object.entries(result);
     setRankData(changeArray.sort((a, b) => b[1] - a[1]));
-    return result;
+    setCurrentYear(currentYear);
   };
 
-  if (!state || !rankData) {
+  if (!state || !rankData || !currentYear) {
     return <div>로딩</div>;
   }
+  console.log(state);
 
   return (
     <div>
@@ -112,6 +111,20 @@ const Result = () => {
             );
           })}
         </ul>
+      </div>
+      <div>
+        <div>--2022년 처음본 동영상</div>
+        <div>{state["2022"][1][state["2022"][1].length - 1].title}</div>
+        <a href={state["2022"][1][state["2022"][1].length - 1].titleUrl}>
+          {state["2022"][1][state["2022"][1].length - 1].titleUrl}
+        </a>
+      </div>
+      <div>
+        <div>--2022년 마지막에본 동영상</div>
+        <div>{state["2022"][12][0].title}</div>
+        <a href={state["2022"][12][0].titleUrl}>
+          {state["2022"][12][0].titleUrl}
+        </a>
       </div>
     </div>
   );
