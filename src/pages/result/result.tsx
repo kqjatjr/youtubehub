@@ -25,6 +25,7 @@ type IStatistics = {
 
 const Result = () => {
   const [data, setData] = useState<any>();
+  const [rankData, setRankData] = useState<[string, number][]>();
   const [state, setState] = useRecoilState(dataState);
 
   useEffect(() => {
@@ -55,13 +56,14 @@ const Result = () => {
   };
 
   const count = () => {
-    if (_.isEmpty(state)) {
+    if (!state) {
       return;
     }
     let result: any = {};
     const currentYear = Object.keys(state["2022"]).map((item) => {
       return state["2022"][Number(item)];
     });
+    console.log(currentYear);
 
     currentYear.forEach((item) => {
       item.forEach((data) => {
@@ -72,12 +74,12 @@ const Result = () => {
         }
       });
     });
-
-    setData(Object.keys(result).map((item) => result[item]));
+    const changeArray: [string, number][] = Object.entries(result);
+    setRankData(changeArray.sort((a, b) => b[1] - a[1]));
     return result;
   };
 
-  if (_.isEmpty(state) || !data) {
+  if (!state || !rankData) {
     return <div>로딩</div>;
   }
 
@@ -94,7 +96,23 @@ const Result = () => {
           }, 0)}
         개의 영상
       </div>
-      <div>{Object.keys(data).map((item) => data[item]).length}명의 유튜버</div>
+      <div>{rankData.length}명의 유튜버</div>
+      <div>
+        제일 많이본 유튜버 : {rankData[0][0]}님을 {rankData[0][1]}번
+        시청하셨습니다.
+      </div>
+      <div>
+        <div>당신의 올해를 만들어준 유튜버는</div>
+        <ul>
+          {rankData.slice(0, 10).map((item, idx) => {
+            return (
+              <li key={idx}>
+                {item[0]} : {item[1]}회 시청
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </div>
   );
 };
