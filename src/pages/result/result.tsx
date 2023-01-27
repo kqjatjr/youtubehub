@@ -27,6 +27,7 @@ const Result = () => {
   const [rankData, setRankData] = useState<[string, number][]>();
   const [state, setState] = useRecoilState(dataState);
   const [monthlyChartData, setMonthlyChartData] = useState<Props>();
+  const [selectYear, setSelectYear] = useState<number>();
 
   useEffect(() => {
     setState(arrayData());
