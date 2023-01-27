@@ -4,6 +4,7 @@ import "dayjs/locale/ko";
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import { dataState } from "../../store/recoilState";
+import ReactApexChart, { Props } from "react-apexcharts";
 dayjs.locale("ko");
 
 type TRecord = {
@@ -25,13 +26,73 @@ const Result = () => {
   const [currentYear, setCurrentYear] = useState<TRecord[][]>();
   const [rankData, setRankData] = useState<[string, number][]>();
   const [state, setState] = useRecoilState(dataState);
+  const [monthlyChartData, setMonthlyChartData] = useState<Props>();
 
   useEffect(() => {
     setState(arrayData());
   }, []);
 
   useEffect(() => {
+    if (!state) return;
     count();
+    setMonthlyChartData({
+      series: [
+        {
+          name: "Net Profit",
+          data: Object.keys(state["2022"])
+            .map((item) => {
+              return state["2022"][Number(item)];
+            })
+            .reduce((acc, cur) => {
+              return [...acc, cur.length];
+            }, [] as number[]),
+        },
+      ],
+      options: {
+        chart: {
+          type: "bar",
+          height: 350,
+        },
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            columnWidth: "55%",
+          },
+        },
+        dataLabels: {
+          enabled: false,
+        },
+        stroke: {
+          show: true,
+          width: 2,
+          colors: ["transparent"],
+        },
+        xaxis: {
+          categories: [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ],
+        },
+        yaxis: {
+          title: {
+            text: "시청 횟수",
+          },
+        },
+        fill: {
+          opacity: 1,
+        },
+      },
+    });
   }, [state]);
 
   const arrayData = () => {
@@ -80,7 +141,6 @@ const Result = () => {
   if (!state || !rankData || !currentYear) {
     return <div>로딩</div>;
   }
-  console.log(state);
 
   return (
     <div>
@@ -125,6 +185,17 @@ const Result = () => {
         <a href={state["2022"][12][0].titleUrl}>
           {state["2022"][12][0].titleUrl}
         </a>
+      </div>
+      <div>
+        <div>2022년도 유튜브 시청 평균 횟수</div>
+        <div>
+          <ReactApexChart
+            options={monthlyChartData?.options}
+            series={monthlyChartData?.series}
+            type="bar"
+            height={350}
+          />
+        </div>
       </div>
     </div>
   );
