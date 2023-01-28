@@ -22,6 +22,15 @@ type IStatistics = {
   };
 };
 
+const enum THUMBNAIL_SIZE {
+  NORMAL = "/0.jpg",
+  DEFAULT = "/default.jpg",
+  MQDEFAULT = "/mqdefault.jpg",
+  MAX_SIZE = "/maxresdefault.jpg",
+}
+
+const THUMBNAIL_REPLACE_URL = "https://www.youtube.com/watch?v=";
+
 const Result = () => {
   const [currentYear, setCurrentYear] = useState<TRecord[][]>();
   const [rankData, setRankData] = useState<[string, number][]>();
@@ -39,7 +48,7 @@ const Result = () => {
     setMonthlyChartData({
       series: [
         {
-          name: "Net Profit",
+          name: "시청 횟수",
           data: Object.keys(state["2022"])
             .map((item) => {
               return state["2022"][Number(item)];
@@ -164,6 +173,12 @@ const Result = () => {
     }
   };
 
+  const getThumbnailUrl = (url: string) => {
+    const youtubeUrl = "https://img.youtube.com/vi/";
+    const targetId = url.replace(THUMBNAIL_REPLACE_URL, "");
+    return youtubeUrl + targetId + THUMBNAIL_SIZE.MAX_SIZE;
+  };
+
   if (!state || !rankData || !currentYear) {
     return <div>로딩</div>;
   }
@@ -201,6 +216,12 @@ const Result = () => {
       <div>
         <div>--2022년 처음본 동영상</div>
         <div>{state["2022"][1][state["2022"][1].length - 1].title}</div>
+        <img
+          src={getThumbnailUrl(
+            state["2022"][1][state["2022"][1].length - 1].titleUrl,
+          )}
+          alt="마지막"
+        />
         <a href={state["2022"][1][state["2022"][1].length - 1].titleUrl}>
           {state["2022"][1][state["2022"][1].length - 1].titleUrl}
         </a>
@@ -208,6 +229,10 @@ const Result = () => {
       <div>
         <div>--2022년 마지막에본 동영상</div>
         <div>{state["2022"][12][0].title}</div>
+        <img
+          src={getThumbnailUrl(state["2022"][12][0].titleUrl)}
+          alt="마지막"
+        />
         <a href={state["2022"][12][0].titleUrl}>
           {state["2022"][12][0].titleUrl}
         </a>
