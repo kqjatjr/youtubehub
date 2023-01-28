@@ -139,6 +139,31 @@ const Result = () => {
     setCurrentYear(currentYear);
   };
 
+  const rateOfIncrease = () => {
+    if (!state) return;
+    const currentYear = Object.keys(state["2022"])
+      .map((item) => {
+        return state["2022"][Number(item)];
+      })
+      .reduce((acc, cur) => {
+        return (acc += cur.length);
+      }, 0);
+
+    const lastYear = Object.keys(state["2021"])
+      .map((item) => {
+        return state["2021"][Number(item)];
+      })
+      .reduce((acc, cur) => {
+        return (acc += cur.length);
+      }, 0);
+
+    if (currentYear > lastYear) {
+      return Math.floor(((currentYear - lastYear) / currentYear) * 100);
+    } else {
+      return -Math.floor(((lastYear - currentYear) / lastYear) * 100);
+    }
+  };
+
   if (!state || !rankData || !currentYear) {
     return <div>로딩</div>;
   }
@@ -196,6 +221,32 @@ const Result = () => {
             type="bar"
             height={350}
           />
+        </div>
+        <div>
+          <div>전년대비</div>
+          <div>
+            2021년 시청횟수{" "}
+            {Object.keys(state["2021"])
+              .map((item) => {
+                return state["2021"][Number(item)];
+              })
+              .reduce((acc, cur) => {
+                return (acc += cur.length);
+              }, 0)}
+            회
+          </div>
+          <div>
+            2022년 시청횟수{" "}
+            {Object.keys(state["2022"])
+              .map((item) => {
+                return state["2022"][Number(item)];
+              })
+              .reduce((acc, cur) => {
+                return (acc += cur.length);
+              }, 0)}
+            회
+          </div>
+          <div>전년대비 {rateOfIncrease()}% 시청을 하였습니다.</div>
         </div>
       </div>
     </div>
