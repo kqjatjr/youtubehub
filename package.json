@@ -10,6 +10,7 @@
     "@types/node": "^16.18.11",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
+    "antd": "^5.1.7",
     "apexcharts": "^3.36.3",
     "daisyui": "^2.47.0",
     "dayjs": "^1.11.7",
