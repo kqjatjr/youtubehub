@@ -10,7 +10,7 @@ import {
   youtubeHistoryOfSelectedYearArrayState,
   rankOfYoutubeCreatorOfSelectedYearState,
 } from "../../store/recoilState";
-import ReactApexChart, { Props } from "react-apexcharts";
+import Chart from "../../components/Chart";
 
 dayjs.locale("ko");
 
@@ -55,7 +55,6 @@ const getThumbnailUrl = (
 
 const Result = () => {
   const [history, setHistory] = useRecoilState(youtubeHistoryState);
-  const [monthlyChartData, setMonthlyChartData] = useState<Props>();
   const [selectedYear] = useState<number>(() => dayjs(Date.now()).year() - 1);
   const lastYear = selectedYear - 1;
   const youtubeHistoryOfSelectedYearArray = useRecoilValue(
@@ -71,64 +70,6 @@ const Result = () => {
   useEffect(() => {
     setHistory(arrayData());
   }, []);
-
-  useEffect(() => {
-    if (!history) return;
-    setMonthlyChartData({
-      series: [
-        {
-          name: "시청 횟수",
-          data: Object.entries(history[selectedYear]).reduce((acc, cur) => {
-            return [...acc, cur[1].length];
-          }, [] as number[]),
-        },
-      ],
-      options: {
-        chart: {
-          type: "bar",
-          height: 350,
-        },
-        plotOptions: {
-          bar: {
-            horizontal: false,
-            columnWidth: "55%",
-          },
-        },
-        dataLabels: {
-          enabled: false,
-        },
-        stroke: {
-          show: true,
-          width: 2,
-          colors: ["transparent"],
-        },
-        xaxis: {
-          categories: [
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "May",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dec",
-          ],
-        },
-        yaxis: {
-          title: {
-            text: "시청 횟수",
-          },
-        },
-        fill: {
-          opacity: 1,
-        },
-      },
-    });
-  }, [history]);
 
   const rateOfIncrease = () => {
     if (
@@ -149,7 +90,7 @@ const Result = () => {
     return Math.floor((max - min) / min) * 100 * (isIncreased ? 1 : -1);
   };
 
-  if (!history || !rankData || !monthlyChartData) {
+  if (!history || !rankData) {
     return <div>로딩</div>;
   }
 
@@ -197,12 +138,7 @@ const Result = () => {
       <div>
         <div>{selectedYear}년도 유튜브 시청 평균 횟수</div>
         <div>
-          <ReactApexChart
-            options={monthlyChartData?.options}
-            series={monthlyChartData?.series}
-            type="bar"
-            height={350}
-          />
+          <Chart selectedYear={selectedYear} />
         </div>
         <div>
           <div>전년대비</div>
