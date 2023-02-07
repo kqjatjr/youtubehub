@@ -2,25 +2,17 @@ import dayjs from "dayjs";
 import sample from "../../sample/시청 기록.json";
 import "dayjs/locale/ko";
 import { useEffect, useState } from "react";
-import { useRecoilState } from "recoil";
-import { dataState } from "../../store/recoilState";
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  youtubeHistoryState,
+  IStatistics,
+  THistoryRecord,
+  youtubeHistoryOfSelectedYearArrayState,
+  rankOfYoutubeCreatorOfSelectedYearState,
+} from "../../store/recoilState";
 import ReactApexChart, { Props } from "react-apexcharts";
-dayjs.locale("ko");
 
-type TRecord = {
-  activityControls: string[];
-  header: string;
-  products: string[];
-  subtitles: { name: string; url: string }[];
-  time: string;
-  title: string;
-  titleUrl: string;
-};
-type IStatistics = {
-  [key: number]: {
-    [key: number]: TRecord[];
-  };
-};
+dayjs.locale("ko");
 
 const enum THUMBNAIL_SIZE {
   NORMAL = "/0.jpg",
@@ -31,31 +23,64 @@ const enum THUMBNAIL_SIZE {
 
 const THUMBNAIL_REPLACE_URL = "https://www.youtube.com/watch?v=";
 
+const arrayData = () => {
+  return (sample as any[]).reduce(
+    (acc, value: Omit<THistoryRecord, "id">, index) => {
+      const cur = { id: index, ...value };
+      const day = dayjs(cur.time);
+      return {
+        ...acc,
+        [day.year()]: acc[day.year()]
+          ? {
+              ...acc[day.year()],
+              [day.month() + 1]: acc[day.year()][day.month() + 1]
+                ? [...acc[day.year()][day.month() + 1], cur]
+                : [cur],
+            }
+          : { [day.month() + 1]: [cur] },
+      };
+    },
+    {} as IStatistics,
+  );
+};
+
+const getThumbnailUrl = (
+  url: string,
+  size: THUMBNAIL_SIZE = THUMBNAIL_SIZE.MAX_SIZE,
+) => {
+  const youtubeUrl = "https://img.youtube.com/vi/";
+  const targetId = url.replace(THUMBNAIL_REPLACE_URL, "");
+  return youtubeUrl + targetId + size;
+};
+
 const Result = () => {
-  const [currentYear, setCurrentYear] = useState<TRecord[][]>();
-  const [rankData, setRankData] = useState<[string, number][]>();
-  const [state, setState] = useRecoilState(dataState);
+  const [history, setHistory] = useRecoilState(youtubeHistoryState);
   const [monthlyChartData, setMonthlyChartData] = useState<Props>();
-  const [selectYear, setSelectYear] = useState<number>();
+  const [selectedYear] = useState<number>(() => dayjs(Date.now()).year() - 1);
+  const lastYear = selectedYear - 1;
+  const youtubeHistoryOfSelectedYearArray = useRecoilValue(
+    youtubeHistoryOfSelectedYearArrayState(selectedYear),
+  );
+  const youtubeHistoryOfSelectedLastYearArray = useRecoilValue(
+    youtubeHistoryOfSelectedYearArrayState(lastYear),
+  );
+  const rankData = useRecoilValue(
+    rankOfYoutubeCreatorOfSelectedYearState(selectedYear),
+  );
 
   useEffect(() => {
-    setState(arrayData());
+    setHistory(arrayData());
   }, []);
 
   useEffect(() => {
-    if (!state) return;
-    count();
+    if (!history) return;
     setMonthlyChartData({
       series: [
         {
           name: "시청 횟수",
-          data: Object.keys(state["2022"])
-            .map((item) => {
-              return state["2022"][Number(item)];
-            })
-            .reduce((acc, cur) => {
-              return [...acc, cur.length];
-            }, [] as number[]),
+          data: Object.entries(history[selectedYear]).reduce((acc, cur) => {
+            return [...acc, cur[1].length];
+          }, [] as number[]),
         },
       ],
       options: {
@@ -103,99 +128,39 @@ const Result = () => {
         },
       },
     });
-  }, [state]);
-
-  const arrayData = () => {
-    return Object.keys(sample)
-      .map((item) => sample[item as keyof typeof sample])
-      .reduce((acc, cur: TRecord) => {
-        const day = dayjs(cur.time);
-        return {
-          ...acc,
-          [day.year()]: acc[day.year()]
-            ? {
-                ...acc[day.year()],
-                [day.month() + 1]: acc[day.year()][day.month() + 1]
-                  ? [...acc[day.year()][day.month() + 1], cur]
-                  : [cur],
-              }
-            : { [day.month() + 1]: [cur] },
-        };
-      }, {} as IStatistics);
-  };
-
-  const count = () => {
-    if (!state) {
-      return;
-    }
-    let result: any = {};
-    const currentYear = Object.keys(state["2022"]).map((item) => {
-      return state["2022"][Number(item)];
-    });
-
-    currentYear.forEach((item) => {
-      item.forEach((data) => {
-        if (data.subtitles && data.subtitles.length > 0) {
-          result[data.subtitles[0].name] = result[data.subtitles[0].name]
-            ? (result[data.subtitles[0].name] += 1)
-            : 1;
-        }
-      });
-    });
-
-    const changeArray: [string, number][] = Object.entries(result);
-    setRankData(changeArray.sort((a, b) => b[1] - a[1]));
-    setCurrentYear(currentYear);
-  };
+  }, [history]);
 
   const rateOfIncrease = () => {
-    if (!state) return;
-    const currentYear = Object.keys(state["2022"])
-      .map((item) => {
-        return state["2022"][Number(item)];
-      })
-      .reduce((acc, cur) => {
-        return (acc += cur.length);
-      }, 0);
+    if (
+      !youtubeHistoryOfSelectedYearArray ||
+      !youtubeHistoryOfSelectedLastYearArray
+    )
+      return;
+    const currentYearViewCount = youtubeHistoryOfSelectedYearArray.length;
 
-    const lastYear = Object.keys(state["2021"])
-      .map((item) => {
-        return state["2021"][Number(item)];
-      })
-      .reduce((acc, cur) => {
-        return (acc += cur.length);
-      }, 0);
+    const lastYearViewCount = youtubeHistoryOfSelectedLastYearArray.length;
 
-    if (currentYear > lastYear) {
-      return Math.floor(((currentYear - lastYear) / currentYear) * 100);
-    } else {
-      return -Math.floor(((lastYear - currentYear) / lastYear) * 100);
-    }
+    const isIncreased = currentYearViewCount > lastYearViewCount;
+    const min = Math.min(currentYearViewCount, lastYearViewCount);
+    const max = Math.max(currentYearViewCount, lastYearViewCount);
+
+    console.log(min, max);
+
+    return Math.floor((max - min) / min) * 100 * (isIncreased ? 1 : -1);
   };
 
-  const getThumbnailUrl = (url: string) => {
-    const youtubeUrl = "https://img.youtube.com/vi/";
-    const targetId = url.replace(THUMBNAIL_REPLACE_URL, "");
-    return youtubeUrl + targetId + THUMBNAIL_SIZE.MAX_SIZE;
-  };
-
-  if (!state || !rankData || !currentYear) {
+  if (!history || !rankData || !monthlyChartData) {
     return <div>로딩</div>;
   }
 
+  console.log(Object.entries(history[selectedYear]));
+
+  const firstWatchedVideo = youtubeHistoryOfSelectedYearArray.at(0);
+  const lastWatchedVideo = youtubeHistoryOfSelectedYearArray.at(-1);
+
   return (
     <div>
-      <div>
-        {Object.keys(state["2022"])
-          .map((item) => {
-            return state["2022"][Number(item)];
-          })
-          .reduce((acc, cur) => {
-            acc += cur.length;
-            return acc;
-          }, 0)}
-        개의 영상
-      </div>
+      <div>{youtubeHistoryOfSelectedYearArray.length} 개의 영상</div>
       <div>{rankData.length}명의 유튜버</div>
       <div>
         제일 많이본 유튜버 : {rankData[0][0]}님을 {rankData[0][1]}번
@@ -213,32 +178,24 @@ const Result = () => {
           })}
         </ul>
       </div>
+      {firstWatchedVideo && (
+        <div>
+          <div>--{selectedYear}년 처음본 동영상</div>
+          <div>{firstWatchedVideo.title}</div>
+          <img src={getThumbnailUrl(firstWatchedVideo.titleUrl)} alt="마지막" />
+          <a href={firstWatchedVideo.titleUrl}>{firstWatchedVideo.titleUrl}</a>
+        </div>
+      )}
+      {lastWatchedVideo && (
+        <div>
+          <div>--{selectedYear}년 마지막에본 동영상</div>
+          <div>{lastWatchedVideo.title}</div>
+          <img src={getThumbnailUrl(lastWatchedVideo.titleUrl)} alt="마지막" />
+          <a href={lastWatchedVideo.titleUrl}>{lastWatchedVideo.titleUrl}</a>
+        </div>
+      )}
       <div>
-        <div>--2022년 처음본 동영상</div>
-        <div>{state["2022"][1][state["2022"][1].length - 1].title}</div>
-        <img
-          src={getThumbnailUrl(
-            state["2022"][1][state["2022"][1].length - 1].titleUrl,
-          )}
-          alt="마지막"
-        />
-        <a href={state["2022"][1][state["2022"][1].length - 1].titleUrl}>
-          {state["2022"][1][state["2022"][1].length - 1].titleUrl}
-        </a>
-      </div>
-      <div>
-        <div>--2022년 마지막에본 동영상</div>
-        <div>{state["2022"][12][0].title}</div>
-        <img
-          src={getThumbnailUrl(state["2022"][12][0].titleUrl)}
-          alt="마지막"
-        />
-        <a href={state["2022"][12][0].titleUrl}>
-          {state["2022"][12][0].titleUrl}
-        </a>
-      </div>
-      <div>
-        <div>2022년도 유튜브 시청 평균 횟수</div>
+        <div>{selectedYear}년도 유튜브 시청 평균 횟수</div>
         <div>
           <ReactApexChart
             options={monthlyChartData?.options}
@@ -250,25 +207,11 @@ const Result = () => {
         <div>
           <div>전년대비</div>
           <div>
-            2021년 시청횟수{" "}
-            {Object.keys(state["2021"])
-              .map((item) => {
-                return state["2021"][Number(item)];
-              })
-              .reduce((acc, cur) => {
-                return (acc += cur.length);
-              }, 0)}
+            {lastYear}년 시청횟수 {youtubeHistoryOfSelectedLastYearArray.length}{" "}
             회
           </div>
           <div>
-            2022년 시청횟수{" "}
-            {Object.keys(state["2022"])
-              .map((item) => {
-                return state["2022"][Number(item)];
-              })
-              .reduce((acc, cur) => {
-                return (acc += cur.length);
-              }, 0)}
+            {selectedYear}년 시청횟수 {youtubeHistoryOfSelectedYearArray.length}{" "}
             회
           </div>
           <div>전년대비 {rateOfIncrease()}% 시청을 하였습니다.</div>
