@@ -1,5 +1,4 @@
-import { Card, Col, Row, Space } from "antd";
-import styled from "styled-components";
+import { Col, Row } from "antd";
 import { Title, SubTitle } from "./Home.styled";
 
 const Home = () => {
