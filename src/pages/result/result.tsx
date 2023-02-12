@@ -85,16 +85,12 @@ const Result = () => {
     const min = Math.min(currentYearViewCount, lastYearViewCount);
     const max = Math.max(currentYearViewCount, lastYearViewCount);
 
-    console.log(min, max);
-
     return Math.floor((max - min) / min) * 100 * (isIncreased ? 1 : -1);
   };
 
   if (!history || !rankData) {
     return <div>로딩</div>;
   }
-
-  console.log(Object.entries(history[selectedYear]));
 
   const firstWatchedVideo = youtubeHistoryOfSelectedYearArray.at(0);
   const lastWatchedVideo = youtubeHistoryOfSelectedYearArray.at(-1);
