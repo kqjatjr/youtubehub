@@ -1,3 +1,4 @@
+import { Row } from "antd";
 import styled, { keyframes } from "styled-components";
 
 const fadeIn = keyframes`
@@ -11,13 +12,18 @@ const fadeIn = keyframes`
   }
 `;
 
+export const MainContainer = styled(Row)`
+  min-height: 100vh;
+  min-width: 100vw;
+  animation: ${fadeIn} 0.5s ease-in-out;
+`;
+
 export const Title = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
   font-size: 70px;
-  animation: ${fadeIn} 0.5s ease-in-out;
 
   @media only screen and (min-width: 1200px) {
     font-size: 150px;
@@ -36,7 +42,6 @@ export const SubTitle = styled.div`
   justify-content: center;
   font-weight: bold;
   font-size: 20px;
-  animation: ${fadeIn} 0.5s ease-in-out;
 
   @media only screen and (min-width: 1200px) {
     font-size: 40px;
