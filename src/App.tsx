@@ -21,7 +21,7 @@ function App() {
 export default App;
 
 const Layout = styled.div`
-  background-color: #f1ece6;
+  background-color: white;
   min-width: 100vw;
   min-height: 100vh;
 `;

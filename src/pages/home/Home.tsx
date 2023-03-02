@@ -18,18 +18,16 @@ const Home = () => {
         <SubTitle>당신의 유튜브 시청통계를 확인해 보세요</SubTitle>
       </Col>
       <Col span={24}>
-        <Card>
-          <Row>
-            <Col span={24}>
-              <Button>데이터는 어디서 구하나요?</Button>
-            </Col>
-            <Col span={24}>
-              <Button>데이터가 이미 있습니다.</Button>
-            </Col>
-          </Row>
-        </Card>
+        <ButtonContainer gutter={[20, 0]}>
+          <Col>
+            <Button size="large">데이터는 어디서 구하나요?</Button>
+          </Col>
+          <Col>
+            <Button size="large">데이터가 이미 있습니다.</Button>
+          </Col>
+        </ButtonContainer>
       </Col>
-      <Footer style={{ marginTop: "auto" }}>
+      <Footer style={{ marginTop: "auto", marginBottom: "5px" }}>
         <Button size="large">
           <a
             href="https://github.com/kqjatjr"
@@ -45,3 +43,8 @@ const Home = () => {
 };
 
 export default Home;
+
+const ButtonContainer = styled(Row)`
+  display: flex;
+  justify-content: center;
+`;
