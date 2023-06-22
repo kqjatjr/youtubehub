@@ -1,0 +1,15 @@
+pre-commit:
+  parallel: true
+  commands:
+    block-commit:
+      only:
+        - ref: master
+        - ref: main
+        - ref: develop
+      run: exit 1
+      fail_text: "You can't commit to master/main/develop branch directly. Please use Pull Request."
+    lint:
+      run: npx lint-staged
+    tsc:
+      glob: "src/**/*.{ts,tsx}"
+      run: npx tsc --noEmit
